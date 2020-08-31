@@ -1,28 +1,28 @@
-import { EndpointType } from './EndpointType';
+import { EntityType } from '../models/EntityType';
 import { PageResult } from '../models/PageResult';
 
 export class BaseApi {
     private static readonly BASE_API_URL = 'https://pokeapi.co/api/v2';
 
     public static async findById<T>(
-        endpoint: EndpointType,
+        endpoint: EntityType,
         id: number
     ): Promise<T> {
         return BaseApi.get(`${BaseApi.BASE_API_URL}/${endpoint}/${id}`);
     }
 
-    public static async findAll<T>(
-        endpoint: EndpointType,
+    public static async findAll(
+        endpoint: EntityType,
         pageNumber: number,
         pageSize: number
-    ): Promise<PageResult<T>> {
+    ): Promise<PageResult> {
         return BaseApi.get(`${BaseApi.BASE_API_URL}/${endpoint}`, {
             limit: pageSize,
             offset: pageNumber * pageSize,
         });
     }
 
-    private static async get<S>(url: string, params?: object): Promise<S> {
+    public static async get<S>(url: string, params?: object): Promise<S> {
         try {
             const response = await fetch(this.buildUrl(url, params), {
                 method: 'GET',
