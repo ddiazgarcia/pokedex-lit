@@ -1,29 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "es2015",
+    "target": "es2018",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
     "lib": ["es2017", "dom", "dom.iterable"],
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./",
-    "rootDir": "./src",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "plugins": [
-      {
-        "name": "ts-lit-plugin",
-        "strict": true
-      }
-    ]
+    "importHelpers": true,
+    "outDir": "out-tsc",
+    "sourceMap": true,
+    "inlineSources": true,
+    "rootDir": "./"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": []
+  "include": ["**/*.ts"]
 }
