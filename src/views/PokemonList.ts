@@ -2,9 +2,7 @@ import { LitElement, html, customElement, css, property } from 'lit-element';
 import { EntityType } from '../models/EntityType';
 import { NamedResource } from '../models/NamedResource';
 import { connect } from 'pwa-helpers';
-import { store } from '../redux/Store';
-import { PokemonState } from '../redux/PokemonReducer';
-import { PokemonApi } from '../api/PokemonApi';
+import { store, AppState } from '../redux/Store';
 
 @customElement('pokemon-list')
 export class PokemonList extends connect(store)(LitElement) {
@@ -45,8 +43,8 @@ export class PokemonList extends connect(store)(LitElement) {
         this.loadList();
     }
 
-    public stateChanged(state: PokemonState) {
-        this.pokemonList = state.getList(EntityType.POKEMON_SPECIES);
+    public stateChanged(state: AppState) {
+        this.pokemonList = state.pokemon.getList(EntityType.POKEMON_SPECIES);
     }
 
     private async loadList() {
@@ -56,7 +54,11 @@ export class PokemonList extends connect(store)(LitElement) {
             5000
         );
         this.pokemonList = response.results;*/
-        PokemonApi.getPokemonList();
+    }
+
+    disconnectedCallback() {
+        console.log('Disconnect');
+        super.disconnectedCallback();
     }
 
     @property({ type: Array })
