@@ -15,4 +15,11 @@ export enum EntityType {
     MOVE = 'move',
     MOVE_CATEGORY = 'move-category',
     LANGUAGE = 'language',
+    GENERATION = 'generation',
+    POKEDEX = 'pokedex',
+    VERSION = 'version',
+    VERSION_GROUP = 'version-group',
+    LOCATION = 'location',
+    LOCATION_AREA = 'location-area',
+    REGION = 'region',
 }

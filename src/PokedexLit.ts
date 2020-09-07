@@ -6,7 +6,9 @@ import { store, AppState } from './redux/Store';
 import { Language } from './models/Language';
 import { changeLanguage } from './redux/Actions';
 import './views/PokemonList';
+import './components/GenerationList';
 import { InitialLoad } from './api/InitialLoad';
+import { LocalizationUtils } from './utils/LocalizationUtils.js';
 
 export class PokedexLit extends connect(store)(LitElement) {
     @property({ type: String }) page = 'main';
@@ -21,7 +23,7 @@ export class PokedexLit extends connect(store)(LitElement) {
             align-items: center;
             justify-content: flex-start;
             font-size: calc(10px + 2vmin);
-            color: #1a2b42;
+            color: var(--dark);
             /* max-width: 960px; */
             margin: 0 auto;
             text-align: center;
@@ -29,6 +31,31 @@ export class PokedexLit extends connect(store)(LitElement) {
 
         main {
             flex-grow: 1;
+            width: 100%;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .language {
+            font-size: calc(10px + 1vmin);
+        }
+
+        @media screen and (min-width: 600px) {
+            .title {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .title h1 {
+                width: 75%;
+            }
+
+            .title .language {
+                width: 25%;
+            }
         }
 
         .logo > svg {
@@ -114,24 +141,35 @@ export class PokedexLit extends connect(store)(LitElement) {
         return html`
             <main>
                 <!-- <div class="logo">${openWcLogo}</div> -->
-                <h1>My app</h1>
-                <select @change="${this.selectLanguage}">
-                    ${this.languages.map(
-                        lang => html`
-                            <option
-                                value="${lang.name}"
-                                ?selected="${lang.name ===
-                                this.currentLanguage}"
+                <div class="title">
+                    <h1>My Pokédex</h1>
+                    <div class="language">
+                        <label for="language"
+                            >Language:
+                            <select
+                                @change="${this.selectLanguage}"
+                                id="language"
                             >
-                                ${lang.names.find(
-                                    name => name.language.name === lang.name
-                                )?.name || lang.name}
-                            </option>
-                        `
-                    )}
-                </select>
-
-                <p>Edit <code>src/PokedexLit.js</code> and save to reload.</p>
+                                ${this.languages.map(
+                                    lang => html`
+                                        <option
+                                            value="${lang.name}"
+                                            ?selected="${lang.name ===
+                                            this.currentLanguage}"
+                                        >
+                                            ${LocalizationUtils.getName(
+                                                lang.name,
+                                                lang,
+                                                lang.name
+                                            )}
+                                        </option>
+                                    `
+                                )}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <!-- <p>Edit <code>src/PokedexLit.js</code> and save to reload.</p>
                 <a
                     class="app-link"
                     href="https://open-wc.org/developing/#code-examples"
@@ -139,7 +177,8 @@ export class PokedexLit extends connect(store)(LitElement) {
                     rel="noopener noreferrer"
                 >
                     Code examples
-                </a>
+                </a> -->
+                <generation-list></generation-list>
                 <pokemon-list></pokemon-list>
             </main>
 

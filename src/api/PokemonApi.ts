@@ -2,7 +2,7 @@ import { store } from '../redux/Store';
 import { EntityType } from '../models/EntityType';
 import { BaseApi } from './WebApi';
 import { PageResult } from '../models/PageResult';
-import { initialList, item } from '../redux/Actions';
+import { item, pokemonListSuccess, pokemonListStart } from '../redux/Actions';
 import { NamedResource } from '../models/NamedResource';
 import {
     Pokemon,
@@ -10,9 +10,27 @@ import {
     PokemonColor,
     PokemonShape,
     PokemonType,
+    PokemonSprite,
 } from '../models/Pokemon';
 import { DataState } from '../redux/states/DataState';
+import { LocalizationUtils } from '../utils/LocalizationUtils';
+import { LocalizedName } from '../models/LocalizedName';
 export class PokemonApi {
+    public static async getPokemonSpecies(pokemonList: NamedResource[]) {
+        store.dispatch(pokemonListStart());
+        const dependencies = [EntityType.POKEMON, EntityType.POKEMON_TYPE];
+        const list: PokemonSpecie[] = await Promise.all(
+            pokemonList.map(async resource => {
+                return await this.getPokemonSpecie(resource, dependencies);
+            })
+        );
+        store.dispatch(
+            pokemonListSuccess(
+                list.sort((pokeA, pokeB) => pokeA.order - pokeB.order)
+            )
+        );
+    }
+
     public static async getPokemonSpeciesList(): Promise<void> {
         // Search if redux contains a list.
         const state: DataState = store.getState().pokemon;
@@ -21,17 +39,17 @@ export class PokemonApi {
             EntityType.POKEMON_SPECIES
         );
 
-        if (!currentList.length) {
+        const initial = !currentList.length;
+
+        if (initial) {
             const response: PageResult = await BaseApi.findAll(
                 EntityType.POKEMON_SPECIES,
                 0,
                 80
             );
             currentList = response.results;
-            store.dispatch(
-                initialList(currentList, EntityType.POKEMON_SPECIES)
-            );
         }
+
         await Promise.all(
             currentList.map(res =>
                 PokemonApi.getPokemonSpecie(res, [
@@ -50,6 +68,25 @@ export class PokemonApi {
                 ])
             )
         );
+
+        if (initial) {
+            // const lightPokemonList: PokemonLight[] = pokemonSpecies.map(
+            //     specie => ({
+            //         id: specie.id,
+            //         name: specie.name,
+            //         url: specie.url,
+            //         names: specie.names,
+            //         sprites: specie.varieties.find(
+            //             pokemon => pokemon.is_default
+            //         )!.pokemon.sprites,
+            //     })
+            // );
+            // store.dispatch(
+            //     initialList(lightPokemonList, EntityType.POKEMON_SPECIES)
+            // );
+            // LocalStorageApi.saveListMap(store.getState().pokemon.listMap);
+        }
+
         //LocalStorageApi.saveListMap(store.getState().pokemon.listMap);
         //LocalStorageApi.saveEntityMap(store.getState().pokemon.entityMap);
     }
@@ -76,6 +113,9 @@ export class PokemonApi {
                         variety.pokemon = pokemon;
                     })
                 );
+                specie.imageUrl = specie.varieties.find(
+                    poke => poke.is_default
+                )?.pokemon.imageUrl;
             }
             if (loadAll || dependencies.includes(EntityType.POKEMON_COLOR)) {
                 const color = await PokemonApi.getItem<PokemonColor>(
@@ -127,10 +167,18 @@ export class PokemonApi {
                 })
             );
         }
+        pokemon.imageUrl = this.selectDefaultImage(pokemon.sprites);
         return pokemon;
     }
 
-    private static async getItem<T extends NamedResource>(
+    private static selectDefaultImage(sprite: PokemonSprite): string {
+        return (
+            sprite.other?.['official-artwork'].front_default ||
+            sprite.front_default
+        );
+    }
+
+    public static async getItem<T extends NamedResource>(
         resource: NamedResource,
         type: EntityType
     ): Promise<T> {
@@ -144,6 +192,11 @@ export class PokemonApi {
             // 3rd attempt: get from database
             itemResult = await BaseApi.get(resource.url);
             itemResult.url = resource.url;
+            if (itemResult.names) {
+                itemResult.names = LocalizationUtils.toLocalizations(
+                    itemResult.names as LocalizedName[]
+                );
+            }
             //LocalStorageApi.saveEntity(type, itemResult);
             //}
             store.dispatch(item(itemResult, type));

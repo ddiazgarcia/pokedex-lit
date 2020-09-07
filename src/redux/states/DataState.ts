@@ -22,15 +22,23 @@ export class DataState {
         return new DataState({}, {});
     }
 
-    getList(type: EntityType): Array<NamedResource> {
+    getList(type: EntityType | string): Array<NamedResource> {
         return this.listMap[type] || [];
     }
 
-    getEntity(type: EntityType, name: string): unknown {
+    getEntity(type: EntityType | string, name: string): unknown {
         const typeMap = this.entityMap[type];
         if (typeMap) {
             return typeMap[name];
         }
         return undefined;
+    }
+
+    getEntities<T extends NamedResource>(type: EntityType | string): T[] {
+        const typeMap = this.entityMap[type];
+        if (!typeMap) {
+            return [];
+        }
+        return Object.entries(typeMap).map(([, value]) => value as T);
     }
 }

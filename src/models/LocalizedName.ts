@@ -1,4 +1,4 @@
-import { NamedResource } from './NamedResource';
+import { Language } from './Language';
 
 type Name = {
     [name in
@@ -11,7 +11,11 @@ type Name = {
 };
 
 interface Localized {
-    language: NamedResource;
+    language: Language;
 }
 
 export type LocalizedName = Localized & Name;
+
+export type Localizations = {
+    [langCode: string]: string;
+};

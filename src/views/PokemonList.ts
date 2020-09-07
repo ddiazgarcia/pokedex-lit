@@ -1,8 +1,10 @@
 import { LitElement, html, customElement, css, property } from 'lit-element';
-import { EntityType } from '../models/EntityType';
-import { NamedResource } from '../models/NamedResource';
 import { connect } from 'pwa-helpers';
 import { store, AppState } from '../redux/Store';
+import '../components/PokemonListItem';
+import { PokemonSpecie } from '../models/Pokemon';
+import { pokemonStart, pokemonSuccess } from '../redux/Actions';
+import { PokemonApi } from '../api/PokemonApi';
 
 @customElement('pokemon-list')
 export class PokemonList extends connect(store)(LitElement) {
@@ -12,13 +14,12 @@ export class PokemonList extends connect(store)(LitElement) {
         }
         .container {
             width: 100%;
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-family: Geneva, Verdana, Tahoma, sans-serif;
             font-size: 3vmin;
             display: flex;
             flex-wrap: wrap;
         }
         .container .item {
-            padding: 5px;
             flex: 100%;
             max-width: 100%;
         }
@@ -37,38 +38,49 @@ export class PokemonList extends connect(store)(LitElement) {
         }
     `;
 
-    public constructor() {
-        super();
-        this.pokemonList = [];
-        this.loadList();
-    }
+    @property({ type: Array, attribute: false })
+    public pokemonList: PokemonSpecie[] = [];
+
+    @property({ type: Object, attribute: false })
+    public selectedPokemon?: PokemonSpecie;
+
+    @property({ type: Boolean, attribute: false })
+    public loading = false;
 
     public stateChanged(state: AppState) {
-        this.pokemonList = state.pokemon.getList(EntityType.POKEMON_SPECIES);
+        this.loading = state.selection.loadingPokemonList;
+        this.pokemonList = state.selection.pokemonList;
+        this.selectedPokemon = state.selection.pokemon;
     }
 
-    private async loadList() {
-        /*const response: PageResult = await BaseApi.findAll(
-            EntityType.POKEMON,
-            0,
-            5000
-        );
-        this.pokemonList = response.results;*/
+    public async onPokemonSelected(pokemon: PokemonSpecie) {
+        console.log(`Selected ${pokemon.name}`);
+        store.dispatch(pokemonStart());
+        const fullPokemon = await PokemonApi.getPokemonSpecie(pokemon);
+        store.dispatch(pokemonSuccess(fullPokemon));
     }
 
-    disconnectedCallback() {
+    public disconnectedCallback() {
         console.log('Disconnect');
         super.disconnectedCallback();
     }
 
-    @property({ type: Array })
-    public pokemonList: NamedResource[];
-
     render() {
+        if (this.loading) {
+            return html`<div class="container">Loading data...</div>`;
+        }
         return html`
             <div class="container">
                 ${this.pokemonList.map(
-                    pokemon => html` <div class="item">${pokemon.name}</div> `
+                    (pokemon, index) => html`
+                        <pokemon-list-item
+                            class="item"
+                            .pokemon="${pokemon}"
+                            index="${index}"
+                            @click=${() => this.onPokemonSelected(pokemon)}
+                        ></pokemon-list-item>
+                    `
+                    //<div class="item">${pokemon.name}</div>
                 )}
             </div>
         `;
