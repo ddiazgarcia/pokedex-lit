@@ -44,5 +44,19 @@
             };
         </script>
         <script type="module" src="./out-tsc/src/pokedex-lit.js"></script>
+        <script type="module">
+            /* eslint-disable no-undef */
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', async () => {
+                    const regResult = await navigator.serviceWorker.register(
+                        '/sw.js'
+                    );
+                    console.log(
+                        'Service worker registered correctly',
+                        regResult
+                    );
+                });
+            }
+        </script>
     </body>
 </html>

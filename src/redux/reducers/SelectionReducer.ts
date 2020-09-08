@@ -35,6 +35,11 @@ export const selectionReducer: Reducer<SelectionState, AnyAction> = (
                 loadingPokemon: false,
                 pokemon: action.payload,
             };
+        case ActionType.PokemonRemove:
+            return {
+                ...state,
+                pokemon: undefined,
+            };
         default:
             return state;
     }

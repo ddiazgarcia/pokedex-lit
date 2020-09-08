@@ -18,7 +18,7 @@ export enum ActionType {
     GenerationChanged = 'GenerationChanged',
     PokemonListStart = 'PokemonListStart',
     PokemonListSuccess = 'PokemonListSuccess',
-    PokemonChanged = 'PokemonChanged',
+    PokemonRemove = 'PokemonRemove',
 }
 
 export interface Action extends AnyAction {
@@ -116,5 +116,11 @@ export const pokemonListSuccess = (pokemonList: PokemonSpecie[]): AnyAction => {
     return {
         type: ActionType.PokemonListSuccess,
         payload: pokemonList,
+    };
+};
+
+export const pokemonRemove = (): AnyAction => {
+    return {
+        type: ActionType.PokemonRemove,
     };
 };
